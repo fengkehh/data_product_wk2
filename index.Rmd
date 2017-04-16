@@ -60,7 +60,7 @@ data_PM25 <- data_PM25[order(data_PM25$Arithmetic.Mean, decreasing = TRUE),]
 ```
 
 # Visualization
-Visualization is accomplished with Leaflet. The code can be found in the [Appendix](#LC).
+The ten worst PM 2.5 offenders in the United States are displayed in the map below. Visualization is accomplished with Leaflet. The code can be found in the [Appendix](#LC).
 
 ```{r leaflet_map}
 library(leaflet)

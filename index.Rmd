@@ -83,7 +83,7 @@ top_ten %>%
 ```
 
 
-Mousing over the marked locations will display the associated PM 2.5 level rank (higher the rank worse the concentration) while clicking on them will display the aggregated PM 2.5 mean levels. As can be seen on the map, most of the worst locations are in California. It may have something to do with the desert-like climate and the amount of automobiles there. Surprisingly, two of them are in Hawaii. Perhaps it is due to the active volcanoes there.
+Mousing over the marked locations will display the associated PM 2.5 level rank (higher the rank worse the concentration) while clicking on them will display the aggregated PM 2.5 mean levels. As can be seen on the map, most of the worst locations are in California. It may have something to do with the desert-like climate and the amount of automobiles there. Surprisingly, two of them are in Hawaii. Perhaps it is due to the active volcanoes.
 
 # Appendix
 

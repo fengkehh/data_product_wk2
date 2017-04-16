@@ -1,0 +1,143 @@
+---
+title: "Interactive Visualization of Air Pollution Data"
+author: "Keh-Harng Feng"
+date: "April 14, 2017"
+output: 
+    bookdown::html_document2:
+        toc: true
+        toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+# Preprocessing
+
+if (!file.exists('annual_all_2016.zip')) {
+    download.file(url = 'http://aqsdr1.epa.gov/aqsweb/aqstmp/airdata/annual_all_2016.zip', destfile = 'annual_all_2016.zip')
+}
+
+if (!file.exists('annual_all_2016.csv')) {
+    unzip('annual_all_2016.zip')
+}
+
+data_2016 <- read.csv('annual_all_2016.csv')
+
+data_2016$Parameter.Code <- factor(data_2016$Parameter.Code)
+```
+
+
+# Introduction
+Fine particulate matter with diameter of 2.5 $\mu m$ or less (hereby referred to as PM2.5) [can often cause serious and long-term negative effects on respiratory systems if inhaled](http://www.who.int/mediacentre/factsheets/fs313/en/). This project aims to identify and visualize the ten locations with the worst PM2.5 air concentration in the United States in 2016.
+
+# Data Description
+An annual summary dataset containing air quality measurements from monitoring sites in 2016 is obtained from the [U.S. Environmental Protection Agency](http://aqsdr1.epa.gov/aqsweb/aqstmp/airdata/download_files.html#Meta). The descriptions for the included variables can be found [here](http://aqsdr1.epa.gov/aqsweb/aqstmp/airdata/FileFormats.html#_annual_summary_files).
+
+The variables of concern for this project are
+
+1. `Latitude`: latitude of the monitoring site.
+2. `Longitude`: longitude of the monitoring site.
+3. `Parameter.Code`: indicates the parameter measured for a particular row of measurements.
+4. `Arithmetic.Mean`: annual mean value for the measured parameter.
+
+The code for data ingress and processing can be found in the [Appendix](#DPC).
+
+# Methodology
+PM 2.5 data with the corresponding parameter code of `88101` is extracted. As this project is mainly for demonstration purpose, a naive approach is adopted to represent PM2.5 levels. In the cases where there are multiple PM2.5 measurements made using different metrics for a specific monitor site, the final PM2.5 level is calculated as an aggregated mean of all values. The result is then sorted in descending order to determine the ranks.
+
+```{r pm25, message = FALSE}
+Selected.Code <- c(88101)
+ind <- data_2016$Parameter.Code %in% Selected.Code
+
+data_PM25 <- data_2016[ind, ]
+
+data_PM25 <- aggregate(list(Arithmetic.Mean = data_PM25$Arithmetic.Mean),
+                       by = list(Latitude = data_PM25$Latitude,
+                                 Longitude = data_PM25$Longitude),
+                       FUN = mean)
+
+data_PM25 <- data_PM25[order(data_PM25$Arithmetic.Mean, decreasing = TRUE),]
+```
+
+# Visualization
+Visualization is accomplished with Leaflet. The code can be found in the [Appendix](#LC).
+
+```{r leaflet_map}
+library(leaflet)
+
+top_ten <- data_PM25[1:10,]
+
+# Compute circle radius 50000*(normalized arithmetic mean Z score + 2)
+radii <- 5e4*((top_ten$Arithmetic.Mean - mean(top_ten$Arithmetic.Mean))/sd(top_ten$Arithmetic.Mean) + 2)
+
+top_ten %>% 
+    leaflet() %>%
+    addTiles() %>%
+    addMarkers(clusterOptions = TRUE, lng = ~Longitude, lat = ~Latitude, 
+               label = paste('Rank', as.character(1:10)),
+               popup = paste('PM2.5 Mean:', 
+                             as.character(round(top_ten$Arithmetic.Mean, 3)), 
+                             'um')) %>%
+    addCircles(lng = ~Longitude, lat = ~Latitude,
+               radius = radii, weight = 0, color = 'red')
+```
+
+Mousing over the marked locations will display the associated PM 2.5 level rank (higher the rank worse the concentration) while clicking on them will display the aggregated PM 2.5 mean levels. As can be seen on the map, most of the worst locations are in California. Surprisingly, two of them are in Hawaii. 
+
+# Appendix
+
+## Data Processing Code {#DPC}
+The data is downloaded and loaded using the following code:
+```{r data_appendix, eval = FALSE, echo = TRUE}
+if (!file.exists('annual_all_2016.zip')) {
+    download.file(url = 'http://aqsdr1.epa.gov/aqsweb/aqstmp/airdata/annual_all_2016.zip', destfile = 'annual_all_2016.zip')
+}
+
+if (!file.exists('annual_all_2016.csv')) {
+    unzip('annual_all_2016.zip')
+}
+
+data_2016 <- read.csv('annual_all_2016.csv')
+```
+
+Parameter.Code is then converted to a factor:
+```{r conversion_appendix, eval = FALSE, echo = TRUE}
+data_2016$Parameter.Code <- factor(data_2016$Parameter.Code)
+
+```
+
+## PM2.5 Extraction {#PM25}
+```{r pm25_appendix, eval = FALSE, echo = TRUE}
+Selected.Code <- c(88101)
+ind <- data_2016$Parameter.Code %in% Selected.Code
+
+data_PM25 <- data_2016[ind, ]
+
+data_PM25 <- aggregate(list(Arithmetic.Mean = data_PM25$Arithmetic.Mean),
+                       by = list(Latitude = data_PM25$Latitude,
+                                 Longitude = data_PM25$Longitude),
+                       FUN = mean)
+
+data_PM25 <- data_PM25[order(data_PM25$Arithmetic.Mean),]
+```
+
+## Leaflet Code {#LC}
+```{r leaflet_appendix, eval = FALSE, echo = TRUE}
+library(leaflet)
+
+top_ten <- data_PM25[1:10,]
+
+# Compute circle radius 50000*(normalized arithmetic mean Z score + 2)
+radii <- 5e4*((top_ten$Arithmetic.Mean - mean(top_ten$Arithmetic.Mean))/sd(top_ten$Arithmetic.Mean) + 2)
+
+top_ten %>% 
+    leaflet() %>%
+    addTiles() %>%
+    addMarkers(clusterOptions = TRUE, lng = ~Longitude, lat = ~Latitude, 
+               label = paste('Rank', as.character(1:10)),
+               popup = paste('PM2.5 Mean:', 
+                             as.character(round(top_ten$Arithmetic.Mean, 3)), 
+                             'um')) %>%
+    addCircles(lng = ~Longitude, lat = ~Latitude,
+               radius = radii, weight = 0, color = 'red')
+```

@@ -118,7 +118,7 @@ data_PM25 <- aggregate(list(Arithmetic.Mean = data_PM25$Arithmetic.Mean),
                                  Longitude = data_PM25$Longitude),
                        FUN = mean)
 
-data_PM25 <- data_PM25[order(data_PM25$Arithmetic.Mean),]
+data_PM25 <- data_PM25[order(data_PM25$Arithmetic.Mean, decreasing = TRUE),]
 ```
 
 ## Leaflet Code {#LC}

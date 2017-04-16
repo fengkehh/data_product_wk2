@@ -1,5 +1,5 @@
 ---
-title: "Interactive Visualization of Air Pollution Data"
+title: "Interactive Visualization of PM 2.5 Pollution in the U.S."
 author: "Keh-Harng Feng"
 date: "April 14, 2017"
 output: 
@@ -28,7 +28,7 @@ data_2016$Parameter.Code <- factor(data_2016$Parameter.Code)
 
 
 # Introduction
-Fine particulate matter with diameter of 2.5 $\mu m$ or less (hereby referred to as PM2.5) [can often cause serious and long-term negative effects on respiratory systems if inhaled](http://www.who.int/mediacentre/factsheets/fs313/en/). This project aims to identify and visualize the ten locations with the worst PM2.5 air concentration in the United States in 2016.
+Fine particulate matter with diameter of 2.5 $\mu m$ or less (hereby referred to as PM 2.5) [can often cause serious and long-term negative effects on respiratory systems if inhaled](https://www.epa.gov/pm-pollution/health-and-environmental-effects-particulate-matter-pm). This project aims to identify and visualize the **top ten** locations with the worst PM 2.5 air concentration in the United States in 2016.
 
 # Data Description
 An annual summary dataset containing air quality measurements from monitoring sites in 2016 is obtained from the [U.S. Environmental Protection Agency](http://aqsdr1.epa.gov/aqsweb/aqstmp/airdata/download_files.html#Meta). The descriptions for the included variables can be found [here](http://aqsdr1.epa.gov/aqsweb/aqstmp/airdata/FileFormats.html#_annual_summary_files).
